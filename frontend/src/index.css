@@ -193,6 +193,8 @@ header .subtitle {
 /* Table */
 .expenses-table-container {
   overflow-x: auto;
+  max-height: 500px;
+  overflow-y: auto;
 }
 
 .expenses-table {
@@ -212,6 +214,9 @@ header .subtitle {
   font-weight: 600;
   color: #666;
   background-color: #fafafa;
+  position: sticky;
+  top: 0;
+  z-index: 1;
 }
 
 .expenses-table tbody tr:hover {

@@ -1,0 +1,276 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background-color: #f5f7fa;
+  color: #333;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+header h1 {
+  font-size: 2rem;
+  color: #2c3e50;
+  margin-bottom: 4px;
+}
+
+header .subtitle {
+  font-size: 0.95rem;
+  color: #7f8c8d;
+  font-weight: 400;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card h2 {
+  font-size: 1.25rem;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+/* Form Styles */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 600px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-group input:disabled,
+.form-group select:disabled {
+  background-color: #f9f9f9;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #2980b9;
+}
+
+.btn-primary:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+}
+
+.btn-retry {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.btn-retry:hover {
+  background-color: #c0392b;
+}
+
+/* Messages */
+.error-message {
+  color: #e74c3c;
+  font-size: 0.875rem;
+  margin-top: 12px;
+  padding: 10px;
+  background-color: #fdf2f2;
+  border-radius: 6px;
+}
+
+.success-message {
+  color: #27ae60;
+  font-size: 0.875rem;
+  margin-top: 12px;
+  padding: 10px;
+  background-color: #f0fdf4;
+  border-radius: 6px;
+}
+
+/* Filter & Total Row */
+.filter-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-row .form-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.total-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.total-label {
+  font-size: 0.875rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.total-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+/* Table */
+.expenses-table-container {
+  overflow-x: auto;
+}
+
+.expenses-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.expenses-table th,
+.expenses-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.expenses-table th {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #666;
+  background-color: #fafafa;
+}
+
+.expenses-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.expenses-table .text-right {
+  text-align: right;
+}
+
+.expenses-table .amount {
+  font-weight: 600;
+  color: #e74c3c;
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background-color: #e8f4fd;
+  color: #2980b9;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* States */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container {
+    padding: 12px;
+  }
+
+  .card {
+    padding: 16px;
+  }
+
+  header h1 {
+    font-size: 1.5rem;
+  }
+
+  .total-amount {
+    font-size: 1.25rem;
+  }
+
+  .expenses-table th,
+  .expenses-table td {
+    padding: 10px 8px;
+    font-size: 0.875rem;
+  }
+}

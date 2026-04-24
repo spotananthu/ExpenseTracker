@@ -35,6 +35,14 @@ app.post('/expenses', async (req, res) => {
       return res.status(400).json({ error: 'Date is required' });
     }
 
+    // Validate date is not in the future
+    const expenseDate = new Date(date);
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    if (expenseDate > today) {
+      return res.status(400).json({ error: 'Date cannot be in the future' });
+    }
+
     const numericAmount = Number(amount);
     if (isNaN(numericAmount) || numericAmount < 0) {
       return res.status(400).json({ error: 'Amount must be a non-negative number' });

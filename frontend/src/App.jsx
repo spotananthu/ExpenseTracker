@@ -7,8 +7,10 @@ const DEFAULT_CATEGORIES = ['Food', 'Transport', 'Shopping', 'Entertainment', 'B
 function App() {
   // State
   const [expenses, setExpenses] = useState([]);
+  const [allExpenses, setAllExpenses] = useState([]); // For summary (unfiltered)
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [sortOrder, setSortOrder] = useState('date_desc');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -29,7 +31,7 @@ function App() {
     try {
       setLoading(true);
       setError(null);
-      const data = await getExpenses(selectedCategory, 'date_desc');
+      const data = await getExpenses(selectedCategory);
       setExpenses(data);
     } catch (err) {
       setError(err.message);
@@ -37,6 +39,23 @@ function App() {
       setLoading(false);
     }
   }, [selectedCategory]);
+
+  // Sort expenses based on sortOrder
+  const sortedExpenses = [...expenses].sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    return sortOrder === 'date_desc' ? dateB - dateA : dateA - dateB;
+  });
+
+  // Fetch all expenses (for summary - unaffected by filters)
+  const fetchAllExpenses = async () => {
+    try {
+      const data = await getExpenses('');
+      setAllExpenses(data);
+    } catch (err) {
+      console.error('Failed to fetch all expenses:', err);
+    }
+  };
 
   // Fetch categories
   const fetchCategories = async () => {
@@ -51,6 +70,7 @@ function App() {
   // Initial fetch
   useEffect(() => {
     fetchExpenses();
+    fetchAllExpenses();
     fetchCategories();
   }, [fetchExpenses]);
 
@@ -102,6 +122,7 @@ function App() {
       setIdempotencyKey(generateIdempotencyKey()); // New key for next submission
       setSubmitSuccess(true);
       fetchExpenses();
+      fetchAllExpenses();
       fetchCategories();
 
       // Clear success message after 3 seconds
@@ -113,8 +134,14 @@ function App() {
     }
   };
 
-  // Calculate total
-  const total = expenses.reduce((sum, exp) => sum + exp.amount, 0);
+  // Calculate total (from ALL expenses, not filtered)
+  const total = allExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+
+  // Calculate totals per category (from ALL expenses)
+  const categoryTotals = allExpenses.reduce((acc, exp) => {
+    acc[exp.category] = (acc[exp.category] || 0) + exp.amount;
+    return acc;
+  }, {});
 
   // Format currency
   const formatCurrency = (amount) => {
@@ -191,6 +218,7 @@ function App() {
                 name="date"
                 value={formData.date}
                 onChange={handleInputChange}
+                max={new Date().toISOString().split('T')[0]}
                 required
                 disabled={submitting}
               />
@@ -234,6 +262,17 @@ function App() {
               ))}
             </select>
           </div>
+          <div className="form-group">
+            <label htmlFor="sort-order">Sort by Date</label>
+            <select
+              id="sort-order"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+            >
+              <option value="date_desc">Newest First</option>
+              <option value="date_asc">Oldest First</option>
+            </select>
+          </div>
           <div className="total-display">
             <span className="total-label">Total:</span>
             <span className="total-amount">{formatCurrency(total)}</span>
@@ -241,48 +280,114 @@ function App() {
         </div>
       </section>
 
-      {/* Expenses List */}
-      <section className="card">
-        <h2>Expenses {selectedCategory && `- ${selectedCategory}`}</h2>
-        
-        {loading ? (
-          <div className="loading">Loading expenses...</div>
-        ) : error ? (
-          <div className="error-message">
-            {error}
-            <button onClick={fetchExpenses} className="btn-retry">
-              Retry
-            </button>
-          </div>
-        ) : expenses.length === 0 ? (
-          <p className="empty-state">No expenses found. Add your first expense above!</p>
-        ) : (
-          <div className="expenses-table-container">
-            <table className="expenses-table">
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Category</th>
-                  <th>Description</th>
-                  <th className="text-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {expenses.map((expense) => (
-                  <tr key={expense.id}>
-                    <td>{formatDate(expense.date)}</td>
-                    <td>
-                      <span className="category-badge">{expense.category}</span>
-                    </td>
-                    <td>{expense.description || '-'}</td>
-                    <td className="text-right amount">{formatCurrency(expense.amount)}</td>
+      {/* Main Content: Expenses + Summary */}
+      <div className="main-content">
+        {/* Expenses List */}
+        <section className="card expenses-panel">
+          <h2>Expenses {selectedCategory && `- ${selectedCategory}`}</h2>
+          
+          {loading ? (
+            <div className="loading">Loading expenses...</div>
+          ) : error ? (
+            <div className="error-message">
+              {error}
+              <button onClick={fetchExpenses} className="btn-retry">
+                Retry
+              </button>
+            </div>
+          ) : expenses.length === 0 ? (
+            <p className="empty-state">No expenses found. Add your first expense above!</p>
+          ) : (
+            <div className="expenses-table-container">
+              <table className="expenses-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th className="text-right">Amount</th>
                   </tr>
+                </thead>
+                <tbody>
+                  {sortedExpenses.map((expense) => (
+                    <tr key={expense.id}>
+                      <td>{formatDate(expense.date)}</td>
+                      <td>
+                        <span className={`category-badge ${expense.category.toLowerCase()}`}>{expense.category}</span>
+                      </td>
+                      <td>{expense.description || '-'}</td>
+                      <td className="text-right amount">{formatCurrency(expense.amount)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        {/* Category Summary - Right Panel */}
+        {Object.keys(categoryTotals).length > 0 && (
+          <aside className="card summary-panel">
+            <h2>Summary</h2>
+            
+            {/* Donut Chart */}
+            <div className="chart-container">
+              <svg viewBox="0 0 100 100" className="donut-chart">
+                {(() => {
+                  const sortedCategories = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
+                  const colors = {
+                    food: '#78716c', transport: '#52525b', shopping: '#a855f7',
+                    entertainment: '#8b5cf6', bills: '#ef4444', health: '#22c55e', other: '#6b7280'
+                  };
+                  const radius = 40;
+                  const circumference = 2 * Math.PI * radius; // ~251.33
+                  let rotation = -90; // Start from top (12 o'clock)
+                  
+                  return sortedCategories.map(([category, amount]) => {
+                    const percent = (amount / total) * 100;
+                    const arcLength = (percent / 100) * circumference;
+                    const currentRotation = rotation;
+                    rotation += (percent / 100) * 360; // Move to next position
+                    
+                    return (
+                      <circle
+                        key={category}
+                        cx="50" cy="50" r={radius}
+                        fill="none"
+                        stroke={colors[category.toLowerCase()] || '#6b7280'}
+                        strokeWidth="12"
+                        strokeDasharray={`${arcLength} ${circumference}`}
+                        transform={`rotate(${currentRotation} 50 50)`}
+                      />
+                    );
+                  });
+                })()}
+              </svg>
+              <div className="chart-center">
+                <span className="chart-total">{formatCurrency(total)}</span>
+              </div>
+            </div>
+
+            <div className="summary-divider"></div>
+            <h3 className="summary-subtitle">By Category</h3>
+            <div className="category-summary">
+              {Object.entries(categoryTotals)
+                .sort((a, b) => b[1] - a[1])
+                .map(([category, amount]) => (
+                  <div key={category} className="summary-row">
+                    <div className="summary-category">
+                      <span className={`category-badge ${category.toLowerCase()}`}>{category}</span>
+                      <span className="summary-percentage">
+                        {((amount / total) * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                    <span className="summary-amount">{formatCurrency(amount)}</span>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
+            </div>
+          </aside>
         )}
-      </section>
+      </div>
     </div>
   );
 }

@@ -26,10 +26,9 @@ export const createExpense = async (expense, idempotencyKey) => {
 };
 
 // Get expenses with optional filters
-export const getExpenses = async (category = '', sort = 'date_desc') => {
+export const getExpenses = async (category = '') => {
   const params = new URLSearchParams();
   if (category) params.append('category', category);
-  if (sort) params.append('sort', sort);
 
   const url = `${API_URL}/expenses${params.toString() ? '?' + params.toString() : ''}`;
   const response = await fetch(url);

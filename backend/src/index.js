@@ -18,6 +18,21 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Root - API info
+app.get('/', (req, res) => {
+  res.json({
+    name: 'Expense Tracker API',
+    version: '1.0.0',
+    endpoints: {
+      'POST /expenses': 'Create expense',
+      'GET /expenses': 'List expenses (optional: ?category=Food)',
+      'GET /categories': 'List unique categories',
+      'GET /health': 'Health check'
+    },
+    docs: 'https://github.com/spotananthu/ExpenseTracker'
+  });
+});
+
 // POST /expenses - Create a new expense
 app.post('/expenses', async (req, res) => {
   try {

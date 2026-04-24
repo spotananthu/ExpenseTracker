@@ -6,8 +6,16 @@ const supabase = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(cors());
+// Middleware - CORS configuration for production
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://expense-tracker-kappa-five-46.vercel.app'
+  ],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'X-Idempotency-Key']
+}));
 app.use(express.json());
 
 // POST /expenses - Create a new expense
